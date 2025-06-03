@@ -5,7 +5,6 @@
 #include <fstream>
 #include <print>
 
-
 void pontSolution(VecDoub x, VecDoub y, int parameters) {
 
   int size = x.size();
@@ -27,7 +26,7 @@ void pontSolution(VecDoub x, VecDoub y, int parameters) {
   VecDoub c = A_T * b;
   util::print(A);
 
-  // use to find a: Solve C * a = c 
+  // use to find a: Solve C * a = c
 
   // LU decomposition for at finde best values: a0, a1, a2
   auto ludcmp_solver = LUdcmp(C);
@@ -46,7 +45,7 @@ void pontSolution(VecDoub x, VecDoub y, int parameters) {
   std::cout << " " << std::endl;
 }
 
-int main(int argc, char *argv[]) {
+int main() {
 
   // Load PontiusData.dat
   int pontDataLength = 40;
