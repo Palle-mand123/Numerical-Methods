@@ -1,0 +1,5 @@
+build/
+out/
+compile_commads.json
+.cashe/
+.cache/
