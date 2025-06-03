@@ -3,3 +3,4 @@ out/
 compile_commads.json
 .cashe/
 .cache/
+.DS_Store
