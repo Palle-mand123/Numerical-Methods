@@ -77,7 +77,8 @@ void pontiusProblem(const std::string &filename) {
   util::print(x_chol);
 }
 
-void filipProblem(const std::string &path) {
+void filipProblem(const std::string &path) { // y = B0 + B1*x + B2*(x**2) + ...
+                                             // + B9*(x**9) + B10*(x**10) + e
   ifstream file(path);
   if (!file.is_open()) {
     cerr << "Could not open file: " << path << endl;
