@@ -3,69 +3,80 @@
 #include "nr3.h"
 #include "utilities.h"
 #include <fstream>
-#include <print>
+#include <iostream>
+#include <vector>
 
-void pontSolution(VecDoub x, VecDoub y, int parameters) {
-
-  int size = x.size();
-  MatDoub A(size, parameters);
-  VecDoub b(size);
-  int k = 1;
-
-  for (int i = 0; i < size; i++) {
-    for (int j = 0; j < parameters; j++) {
-      A[i][j] = pow(x[i], j) / k;
-    }
-    b[i] = y[i] / k;
-  }
-
-  MatDoub A_T = util::Transpose(A);
-
-  // Lektion 2 slide 10
-  MatDoub C = A_T * A;
-  VecDoub c = A_T * b;
-  util::print(A);
-
-  // use to find a: Solve C * a = c
-
-  // LU decomposition for at finde best values: a0, a1, a2
-  auto ludcmp_solver = LUdcmp(C);
-  VecDoub a_ludcmp(parameters);
-  ludcmp_solver.solve(c, a_ludcmp);
-  util::print(a_ludcmp, "LU decomposition");
-
-  std::cout << " " << std::endl;
-
-  // Cholesky for at finde best values: a0, a1, a2
-  VecDoub a_cholesky(parameters);
-  auto cholesky_solver = Cholesky(C);
-  cholesky_solver.solve(c, a_cholesky);
-  util::print(a_cholesky, "Cholesky");
-
-  std::cout << " " << std::endl;
-}
+using namespace std;
 
 int main() {
 
-  // Load PontiusData.dat
-  int pontDataLength = 40;
-  VecDoub pontX(pontDataLength);
-  VecDoub pontY(pontDataLength);
-
-  ifstream readPont("/Users/patrickandersen/Desktop/6 semester/Numeriske "
-                    "Metoder/Code/2/PontiusData.dat");
-
-  if (!readPont) {
-    cerr << "Cant Open PontiusData.dat" << endl;
+  ifstream file("/Users/patrickandersen/Desktop/6 semester/Numeriske "
+                "Metoder/Code/2/PontiusData.dat");
+  if (!file.is_open()) {
+    cerr << "Could not open data file." << endl;
     return 1;
   }
 
-  for (int i = 0; i < pontDataLength; i++) {
-    readPont >> pontX[i];
-    readPont >> pontY[i];
+  vector<double> x_vals, y_vals;
+  double x, y;
+  while (file >> y >> x) {
+    x_vals.push_back(x);
+    y_vals.push_back(y);
+  }
+  file.close();
+
+  int N = x_vals.size();
+  const int M = 3; // a0, a1, a2
+
+  MatDoub A(N, M);
+  VecDoub b(N);
+
+  for (int i = 0; i < N; ++i) {
+    A[i][0] = 1.0;
+    A[i][1] = x_vals[i];
+    A[i][2] = x_vals[i] * x_vals[i];
+    b[i] = y_vals[i];
   }
 
-  pontSolution(pontX, pontY, 3);
+  cout << "A Matrix:" << endl;
+  util::print(A); // A matrix
+
+  cout << "\nB Vector:" << endl;
+  util::print(b); // B vector
+
+  //  At*A and At*b
+  MatDoub AtA(M, M, 0.0);
+  VecDoub Atb(M, 0.0);
+  for (int i = 0; i < M; ++i) {
+    for (int j = 0; j < M; ++j) {
+      for (int k = 0; k < N; ++k) {
+        AtA[i][j] += A[k][i] * A[k][j];
+      }
+    }
+    for (int k = 0; k < N; ++k) {
+      Atb[i] += A[k][i] * b[k];
+    }
+  }
+
+  cout << "\n A_T * b vector:" << endl;
+  util::print(Atb); // A^T*b
+
+  cout << "\n A_T * A Matrix:" << endl;
+  util::print(AtA); // A^T*A Matrix
+
+  VecDoub x_lu(M);
+  LUdcmp lu_solver(AtA);
+  lu_solver.solve(Atb, x_lu);
+
+  cout << "LU decomposition:" << endl;
+  util::print(x_lu);
+
+  VecDoub x_chol(M);
+  Cholesky chol_solver(AtA);
+  chol_solver.solve(Atb, x_chol);
+
+  cout << "\nCholesky decomposition:" << endl;
+  util::print(x_chol);
 
   return 0;
 }
