@@ -148,7 +148,7 @@ int main() {
                  "Metoder/Code/2/PontiusData.dat");
 
   filipProblem("/Users/patrickandersen/Desktop/6 semester/Numeriske "
-               "Metoder/Code/2/FilipData.dat");
+               "Metoder/Code/2/FilipData.dat"); // mister rang = singularitet = kan ikke beregnes med LU eller Cholesky. Der skal bruges SVD
 
   return 0;
 }
