@@ -27,17 +27,15 @@ readData(const std::string &filename) { // Læse data (y, x)
 
 void solvePontius(const std::string &filename) { // y = a0 + a1*x + a2*x^2
   auto [x_vals, y_vals] = readData(filename);
-  std::size_t N = x_vals.size();
+  const int N = x_vals.size();
   const int M = 3;
 
   MatDoub A(N, M);
   VecDoub b(N);
 
-  for (std::size_t i = 0; i < N; ++i) {
-    double x_pow = 1.0;
+  for (int i = 0; i < N; ++i) {
     for (int j = 0; j < M; ++j) {
-      A[i][j] = x_pow;
-      x_pow *= x_vals[i];
+      A[i][j] = std::pow(x_vals[i], j);
     }
     b[i] = y_vals[i];
   }
@@ -45,7 +43,7 @@ void solvePontius(const std::string &filename) { // y = a0 + a1*x + a2*x^2
   VecDoub x(M);
   SVD svd(A);
 
-  svd.solve(b, x);
+  svd.solve(b, x, svd.tsh);
 
   std::cout << "\nBest fit parameters for Prontius using SVD: " << std::endl;
   util::print(x);
@@ -55,25 +53,26 @@ void solveFilip(
     const std::string &filename) { // y = B0 + B1*x + B2*(x**2) + ... +
                                    // B9*(x**9) + B10*(x**10) + e
   auto [x_vals, y_vals] = readData(filename);
-  std::size_t N = x_vals.size();
+  const int N = x_vals.size();
   const int M = 11;
 
   MatDoub A(N, M);
   VecDoub b(N);
 
-  for (std::size_t i = 0; i < N; ++i) {
-    double x_pow = 1.0;
+  for (int i = 0; i < N; ++i) {
     for (int j = 0; j < M; ++j) {
-      A[i][j] = x_pow;
-      x_pow *= x_vals[i];
+      A[i][j] = std::pow(x_vals[i], j);
     }
     b[i] = y_vals[i];
   }
 
   VecDoub x(M);
+
   SVD svd(A);
 
-  svd.solve(b, x);
+  // util::print(svd.u);
+
+  svd.solve(b, x, svd.tsh);
 
   std::cout << "\nBest fit parameters for Filip using SVD: " << std::endl;
   util::print(x);
