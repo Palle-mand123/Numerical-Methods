@@ -1,6 +1,7 @@
 #include "nr3.h"
 #include "svd.h"
 #include "utilities.h"
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -25,6 +26,28 @@ readData(const std::string &filename) { // Læse data (y, x)
   return {x_vals, y_vals};
 }
 
+void sigErrorEstimate(const MatDoub &A, const VecDoub &b, const VecDoub &x,
+                      const SVD &svd) {
+  int M = x.size();
+
+  VecDoub sigma(M);
+
+  for (int j = 0; j < M; j++) {
+    double sum = 0.0;
+    for (int i = 0; i < M; i++) {
+      if (svd.w[i] > svd.tsh) { // values above threshold
+        double term = svd.v[j][i] / svd.w[i];
+        sum += term * term;
+      }
+    }
+    sigma[j] = sqrt(sum);
+  }
+
+  std::cout << "\nAnd now the error:" << std::endl;
+  std::cout << "sigma\tVector " << M << "D:" << std::endl;
+  util::print(sigma);
+}
+
 void solvePontius(const std::string &filename) { // y = a0 + a1*x + a2*x^2
   auto [x_vals, y_vals] = readData(filename);
   const int N = x_vals.size();
@@ -45,8 +68,10 @@ void solvePontius(const std::string &filename) { // y = a0 + a1*x + a2*x^2
 
   svd.solve(b, x, svd.eps);
 
-  std::cout << "\nBest fit parameters for Prontius using SVD: " << std::endl;
+  std::cout << "\nBest fit parameters for Pontius using SVD: " << std::endl;
   util::print(x);
+
+  sigErrorEstimate(A, b, x, svd);
 }
 
 void solveFilip(
@@ -67,15 +92,14 @@ void solveFilip(
   }
 
   VecDoub x(M);
-
   SVD svd(A);
-
-  // util::print(svd.u);
 
   svd.solve(b, x, svd.eps);
 
   std::cout << "\nBest fit parameters for Filip using SVD: " << std::endl;
   util::print(x);
+
+  sigErrorEstimate(A, b, x, svd);
 }
 
 int main() {
