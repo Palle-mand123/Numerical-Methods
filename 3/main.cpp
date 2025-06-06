@@ -43,7 +43,7 @@ void solvePontius(const std::string &filename) { // y = a0 + a1*x + a2*x^2
   VecDoub x(M);
   SVD svd(A);
 
-  svd.solve(b, x, svd.tsh);
+  svd.solve(b, x, svd.eps);
 
   std::cout << "\nBest fit parameters for Prontius using SVD: " << std::endl;
   util::print(x);
@@ -72,7 +72,7 @@ void solveFilip(
 
   // util::print(svd.u);
 
-  svd.solve(b, x, svd.tsh);
+  svd.solve(b, x, svd.eps);
 
   std::cout << "\nBest fit parameters for Filip using SVD: " << std::endl;
   util::print(x);
