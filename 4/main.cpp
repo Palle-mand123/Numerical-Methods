@@ -35,14 +35,14 @@ void residualError(const MatDoub &A, const VecDoub &b, const VecDoub &x) {
   for (int i = 0; i < m; i++) {
     r[i] = Ax[i] - b[i];
   }
-  // The norm of the residual ||Ax - b||
+  // The norm of the residual = ||Ax - b||
   Doub norm_r = 0.0;
   for (int i = 0; i < m; i++) {
     norm_r += r[i] * r[i];
   }
   norm_r = std::sqrt(norm_r);
 
-  // The norm of b ||b||
+  // The norm of b = ||b||
   Doub norm_b = 0.0;
   for (int i = 0; i < m; i++) {
     norm_b += b[i] * b[i];
@@ -56,7 +56,7 @@ void residualError(const MatDoub &A, const VecDoub &b, const VecDoub &x) {
             << epsilon_residual << std::endl;
 }
 
-void randomFitting(const MatDoub &A) {
+void randomFittingError(const MatDoub &A) {
   int m = A.nrows(), n = A.ncols();
   Doub result = std::sqrt((m - n) / static_cast<Doub>(m));
   std::cout << "\nRandom fit Error= " << result << std::endl;
@@ -111,7 +111,7 @@ void solvePontius(const std::string &filename) { // y = a0 + a1*x + a2*x^2
 
   residualError(A, b, x);
 
-  randomFitting(A);
+  randomFittingError(A);
 }
 
 void solveFilip(
@@ -143,7 +143,7 @@ void solveFilip(
 
   residualError(A, b, x);
 
-  randomFitting(A);
+  randomFittingError(A);
 }
 
 int main() {
