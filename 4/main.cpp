@@ -40,23 +40,21 @@ void randomFittingError(const MatDoub &A) {
 }
 
 void sigErrorEstimate(MatDoub A, VecDoub b, VecDoub x, const SVD &svd) {
-  int M = x.size();
 
-  VecDoub sigma(M);
+  VecDoub sigma = VecDoub(svd.w.size());
 
-  for (int j = 0; j < M; j++) {
+  for (int j = 0; j < svd.w.size(); j++) {
     double sum = 0.0;
-    for (int i = 0; i < M; i++) {
+    for (int i = 0; i < svd.w.size(); i++) {
       if (svd.w[i] > svd.tsh) { // values above threshold
-        double term = svd.v[j][i] / svd.w[i];
-        sum += term * term;
+        sum += pow(svd.v[j][i] / svd.w[i], 2);
       }
     }
     sigma[j] = sqrt(sum);
   }
 
   std::cout << "\nAnd now the error:" << std::endl;
-  std::cout << "sigma\tVector " << M << "D:" << std::endl;
+  std::cout << "sigma\tVector " << svd.w.size() << "D:" << std::endl;
   util::print(sigma);
 }
 
@@ -90,6 +88,27 @@ void solvePontius(const std::string &filename) { // y = a0 + a1*x + a2*x^2
   randomFittingError(A);
 }
 
+void solveWeightedFillip(MatDoub A, VecDoub b, VecDoub x) {
+  auto r = A * x - b;
+  double sigma;
+  MatDoub A_sigma = A;
+  VecDoub b_sigma = b;
+
+  for (int i = 0; i < A.nrows(); i++) {
+    sigma = std::max(1.0, std::abs(r[i]));
+    for (int j = 0; j < A.ncols(); j++) {
+      A_sigma[i][j] /= sigma;
+    }
+    b_sigma[i] /= sigma;
+  }
+  SVD svd(A_sigma);
+  VecDoub sigma_x(A_sigma.ncols());
+  svd.solve(b_sigma, sigma_x, svd.eps);
+  std::cout << "\nBest fit parameters for Filip using weighted SVD: "
+            << std::endl;
+  util::print(sigma_x);
+}
+
 void solveFilip(
     const std::string &filename) { // y = B0 + B1*x + B2*(x**2) + ... +
                                    // B9*(x**9) + B10*(x**10) + e
@@ -120,6 +139,8 @@ void solveFilip(
   residualError(A, b, x);
 
   randomFittingError(A);
+
+  solveWeightedFillip(A, b, x);
 }
 
 int main() {
