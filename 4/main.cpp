@@ -26,34 +26,11 @@ readData(const std::string &filename) { // Læse data (y, x)
   return {x_vals, y_vals};
 }
 
-void residualError(const MatDoub &A, const VecDoub &b, const VecDoub &x) {
-  int m = A.nrows(), n = A.ncols();
-
-  // Residual vector r = Ax - b
-  VecDoub Ax = A * x;
-  VecDoub r(m);
-  for (int i = 0; i < m; i++) {
-    r[i] = Ax[i] - b[i];
-  }
-  // The norm of the residual = ||Ax - b||
-  Doub norm_r = 0.0;
-  for (int i = 0; i < m; i++) {
-    norm_r += r[i] * r[i];
-  }
-  norm_r = std::sqrt(norm_r);
-
-  // The norm of b = ||b||
-  Doub norm_b = 0.0;
-  for (int i = 0; i < m; i++) {
-    norm_b += b[i] * b[i];
-  }
-  norm_b = std::sqrt(norm_b);
-
-  // The relative residual error
-  Doub epsilon_residual =
-      (norm_b != 0.0) ? (norm_r / norm_b) : 0.0; // Avoid division by zero
-  std::cout << "\nRelative residual error epsilon_residual = "
-            << epsilon_residual << std::endl;
+void residualError(MatDoub A, VecDoub b, VecDoub x) {
+  VecDoub top = A * x - b;
+  Doub error = util::norm(top) / util::norm(b);
+  std::cout << "\nRelative residual error epsilon_residual = " << error
+            << std::endl;
 }
 
 void randomFittingError(const MatDoub &A) {
@@ -62,8 +39,7 @@ void randomFittingError(const MatDoub &A) {
   std::cout << "\nRandom fit Error= " << result << std::endl;
 }
 
-void sigErrorEstimate(const MatDoub &A, const VecDoub &b, const VecDoub &x,
-                      const SVD &svd) {
+void sigErrorEstimate(MatDoub A, VecDoub b, VecDoub x, const SVD &svd) {
   int M = x.size();
 
   VecDoub sigma(M);
