@@ -18,8 +18,7 @@ void solveBisection(double a, double b, double tol, equation &f) {
   double dx = b - a;
   int k = 1;
 
-  std::print("Bisection\n");
-  std::print("k  {:>10}  {:>10}  {:>10}\n", "xmin", "xmax", "dx");
+  std::print("\n k  {:>10}  {:>10}  {:>10}\n", "xmin", "xmax", "dx");
 
   // Bisection loop
   while (true) {
@@ -61,8 +60,7 @@ void solveNewton(double x0, double tol, equationWithDerivative &f,
                  int maxIter = 100) {
   double x = x0;
 
-  std::print("Newton\n");
-  std::print("{:>5} {:>15} {:>15}\n", "k", "x", "dx");
+  std::print("\n{:>5} {:>15} {:>15}\n", "k", "x", "dx");
 
   for (int k = 1; k <= maxIter; k++) {
     double fx = f(x);
@@ -105,8 +103,7 @@ void solveSecant(double x0, double x1, double tol, equation &f,
   double x_prev = x0;
   double x_curr = x1;
 
-  std::print("Secant Method\n");
-  std::print("{:>5} {:>15} {:>15}\n", "k", "x", "dx");
+  std::print("\n{:>5} {:>15} {:>15}\n", "k", "x", "dx");
 
   for (int k = 1; k <= maxIter; k++) {
     double f_prev = f(x_prev);
@@ -144,6 +141,136 @@ void numericalRecipesSecant(double x1, double x2, double tol, equation &f) {
   }
 }
 
+void solveFalsePosition(double a, double b, double tol, equation &f,
+                        int maxIter = 100) {
+  double fa = f(a);
+  double fb = f(b);
+
+  if (fa * fb > 0.0) {
+    std::print("Error: Root must be bracketed for False Position\n");
+    return;
+  }
+
+  std::print("\n k {:>10}  {:>10}  {:>10}\n", "xmin", "xmax", "dx");
+
+  for (int k = 1; k <= maxIter; k++) {
+    double dx = b - a;
+
+    std::print("{:2}  {:10.6f}  {:10.6f}  {:10.6f}\n", k, a, b, dx);
+
+    // Correct False position formula: c = a - fa * (b - a) / (fb - fa)
+    double c = a - fa * (b - a) / (fb - fa);
+    double fc = f(c);
+
+    if (std::abs(fc) <= tol || dx <= tol) {
+      std::print("Result: {:.6f}\n", c);
+      return;
+    }
+
+    if (fa * fc < 0.0) {
+      b = c;
+      fb = fc;
+    } else {
+      a = c;
+      fa = fc;
+    }
+  }
+
+  std::print("False Position method failed to converge after {} iterations\n",
+             maxIter);
+}
+
+void numericalRecipesFalsePosition(double x1, double x2, double tol,
+                                   equation &f) {
+  try {
+    double root = rtflsp(f, x1, x2, tol);
+    std::print("False Position Root found: {:.8f}\n", root);
+    std::print("False Position Verification: f({:.8f}) = {:.8f}\n", root,
+               f(root));
+  } catch (const char *error) {
+    std::print("False Position Error: {}\n", error);
+  }
+}
+
+void solveRidders(double a, double b, double tol, equation &f,
+                  int maxIter = 100) {
+  double fa = f(a);
+  double fb = f(b);
+
+  if (fa * fb > 0.0) {
+    std::print("Error: Root must be bracketed for Ridders method\n");
+    return;
+  }
+
+  std::print("\n{:>5} {:>15} {:>15}\n", "k", "x", "dx");
+
+  double xl = a, xh = b;
+  double fl = fa, fh = fb;
+  double ans = -9.99e99; 
+
+  for (int k = 1; k <= maxIter; k++) {
+    double xm = 0.5 * (xl + xh);
+    double fm = f(xm);
+
+    double s = std::sqrt(fm * fm - fl * fh);
+    if (s == 0.0) {
+      std::print("{:5} {:15.6f} {:15.6g}\n", k, ans, 0.0);
+      std::print("Result: {:.6f}\n", ans);
+      return;
+    }
+
+    double xnew = xm + (xm - xl) * ((fl >= fh ? 1.0 : -1.0) * fm / s);
+
+    double dx = (k == 1) ? std::abs(xnew - xm) : std::abs(xnew - ans);
+
+    std::print("{:5} {:15.6f} {:15.6g}\n", k, xnew, dx);
+
+    if (k > 1 && std::abs(xnew - ans) <= tol) {
+      std::print("Result: {:.6f}\n", xnew);
+      return;
+    }
+
+    ans = xnew;
+    double fnew = f(ans);
+
+    if (std::abs(fnew) <= tol) {
+      std::print("Result: {:.6f}\n", ans);
+      return;
+    }
+
+    if (fm * fnew < 0.0) {
+      xl = xm;
+      fl = fm;
+      xh = ans;
+      fh = fnew;
+    } else if (fl * fnew < 0.0) {
+      xh = ans;
+      fh = fnew;
+    } else if (fh * fnew < 0.0) {
+      xl = ans;
+      fl = fnew;
+    }
+
+    if (std::abs(xh - xl) <= tol) {
+      std::print("Result: {:.6f}\n", ans);
+      return;
+    }
+  }
+
+  std::print("Ridders method failed to converge after {} iterations\n",
+             maxIter);
+}
+
+void numericalRecipesRidders(double x1, double x2, double tol, equation &f) {
+  try {
+    double root = zriddr(f, x1, x2, tol);
+    std::print("Ridders Root found: {:.8f}\n", root);
+    std::print("Ridders Verification: f({:.8f}) = {:.8f}\n", root, f(root));
+  } catch (const char *error) {
+    std::print("Ridders Error: {}\n", error);
+  }
+}
+
 int main() {
   equation f;
   equationWithDerivative fWithDerivative;
@@ -164,10 +291,6 @@ int main() {
   std::print("\n=== Newton-Raphson Method (with table) ===\n");
   solveNewton(a, tol, fWithDerivative);
 
-  // Your custom Newton is "pure" and only needs one guess, while the library
-  // Newton is "safe" and needs bracketing for robustness. The library version
-  // is more like a combination of Newton + Bisection methods.
-
   std::print("\n=== Newton-Raphson Method (library) ===\n");
   numericalRecipesNewton(a, b, tol, fWithDerivative);
 
@@ -179,6 +302,24 @@ int main() {
 
   std::print("\n=== Secant Method (library) ===\n");
   numericalRecipesSecant(a, b, tol, f);
+
+  std::print("\n---------------------------------------------------------------"
+             "----\n");
+
+  std::print("\n=== False Position Method (with table) ===\n");
+  solveFalsePosition(a, b, tol, f);
+
+  std::print("\n=== False Position Method (library) ===\n");
+  numericalRecipesFalsePosition(a, b, tol, f);
+
+  std::print("\n---------------------------------------------------------------"
+             "----\n");
+
+  std::print("\n=== Ridders Method (with table) ===\n");
+  solveRidders(a, b, tol, f);
+
+  std::print("\n=== Ridders Method (library) ===\n");
+  numericalRecipesRidders(a, b, tol, f);
 
   return 0;
 }
