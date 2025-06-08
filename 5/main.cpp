@@ -1,6 +1,7 @@
 #include "nr3.h"
 #include "roots.h"
 #include <cmath>
+#include <cstdlib>
 #include <print>
 
 struct equation {
@@ -98,10 +99,9 @@ void numericalRecipesNewton(double x1, double x2, double tol,
   }
 }
 
-void solveSecant(double x0, double x1, double tol, equation &f,
-                 int maxIter = 100) {
+void solveSecant(double x0, double tol, equation &f, int maxIter = 100) {
   double x_prev = x0;
-  double x_curr = x1;
+  double x_curr = 0.611015; // random initial guess
 
   std::print("\n{:>5} {:>15} {:>15}\n", "k", "x", "dx");
 
@@ -115,9 +115,9 @@ void solveSecant(double x0, double x1, double tol, equation &f,
     }
 
     double x_new = x_curr - f_curr * (x_curr - x_prev) / (f_curr - f_prev);
-    double dx = x_new - x_curr;
+    double dx = x_curr - x_prev;
 
-    std::print("{:5} {:15.6f} {:15.6g}\n", k, x_curr, std::abs(dx));
+    std::print("{:5} {:15.6f} {:15.6g}\n", k, x_prev, std::abs(dx));
 
     if (std::abs(dx) <= tol || std::abs(f_curr) <= tol) {
       std::print("Result: {:.6f}\n", x_new);
@@ -154,18 +154,11 @@ void solveFalsePosition(double a, double b, double tol, equation &f,
   std::print("\n k {:>10}  {:>10}  {:>10}\n", "xmin", "xmax", "dx");
 
   for (int k = 1; k <= maxIter; k++) {
-    double dx = b - a;
-
-    std::print("{:2}  {:10.6f}  {:10.6f}  {:10.6f}\n", k, a, b, dx);
 
     // Correct False position formula: c = a - fa * (b - a) / (fb - fa)
     double c = a - fa * (b - a) / (fb - fa);
     double fc = f(c);
-
-    if (std::abs(fc) <= tol || dx <= tol) {
-      std::print("Result: {:.6f}\n", c);
-      return;
-    }
+    double dx = b - a;
 
     if (fa * fc < 0.0) {
       b = c;
@@ -173,6 +166,13 @@ void solveFalsePosition(double a, double b, double tol, equation &f,
     } else {
       a = c;
       fa = fc;
+    }
+
+    std::print("{:2}  {:10.6f}  {:10.6f}  {:10.6f}\n", k, a, b, dx);
+
+    if (std::abs(fc) <= tol || dx <= tol) {
+      std::print("Result: {:.6f}\n", c);
+      return;
     }
   }
 
@@ -206,7 +206,7 @@ void solveRidders(double a, double b, double tol, equation &f,
 
   double xl = a, xh = b;
   double fl = fa, fh = fb;
-  double ans = -9.99e99; 
+  double ans = -9.99e99;
 
   for (int k = 1; k <= maxIter; k++) {
     double xm = 0.5 * (xl + xh);
@@ -298,7 +298,7 @@ int main() {
              "----\n");
 
   std::print("\n=== Secant Method (with table) ===\n");
-  solveSecant(a, b, tol, f);
+  solveSecant(a, tol, f);
 
   std::print("\n=== Secant Method (library) ===\n");
   numericalRecipesSecant(a, b, tol, f);

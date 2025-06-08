@@ -72,7 +72,8 @@ void problemII(double a, double b, std::function<double(double)> integral,
     // Order estimate
     double order_estimate = 0.0;
     if (i > 3 && fabs(differences[i - 1]) > 1e-20) {
-      order_estimate = log(fabs(differences[i - 1] / differences[i])) / log(2.0);
+      order_estimate =
+          log(fabs(differences[i - 1] / differences[i])) / log(2.0);
     }
 
     // Function calculations
@@ -85,8 +86,7 @@ void problemII(double a, double b, std::function<double(double)> integral,
          << fixed << setprecision(6) << order_estimate << endl;
 
     if (fabs(richError) < tolerance && i > 3) {
-      cout << "\nConverged to desired accuracy."
-           << endl;
+      cout << "\nConverged to desired accuracy." << endl;
       break;
     }
   }
