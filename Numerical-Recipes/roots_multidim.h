@@ -3,6 +3,7 @@
 #include "ludcmp.h"
 #include "nr3.h"
 #include "qrdcmp.h"
+#include "utilities.h"
 template <class T>
 void lnsrch(VecDoub_I &xold, const Doub fold, VecDoub_I &g, VecDoub_IO &p,
             VecDoub_O &x, Doub &f, const Doub stpmax, Bool &check, T &func) {
