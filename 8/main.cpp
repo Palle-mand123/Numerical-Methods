@@ -116,17 +116,15 @@ std::vector<double> order_estimates(const std::vector<double> &alphaK) {
 
 std::pair<std::vector<double>, std::vector<int>> computeMethod(
     std::function<double(double (*f)(double), double, double, int)> method,
-    double (*f)(double), double a_low, double b_high, double accuracy = 1e-10,
-    int max_iterations = 10000) {
+    double (*f)(double), double a_low, double b_high, double exp_order,
+    double accuracy = 1e-10, int max_iterations = 10000) {
   std::vector<double> A_h;
   std::vector<int> f_computations;
-  double exp_order = 0.0;
   double error = std::numeric_limits<double>::max();
   int iterations = 2;
   while (abs(error) > accuracy && iterations < max_iterations) {
     A_h.push_back(method(f, a_low, b_high, iterations));
     f_computations.push_back(iterations);
-    exp_order = 2.0;
     error = richError_current(A_h, pow(2, exp_order));
     iterations *= 2;
   }
@@ -139,22 +137,67 @@ int main() {
   double a_low = 0.0;
   double b_high = 1.0;
 
-  auto result = computeMethod(midPointRec, func_1, a_low, b_high);
-  std::vector<double> A_h = result.first;
-  std::vector<double> diff = A_h_diff(A_h);
-  std::vector<double> alpha = alphaK(A_h);
-  std::vector<double> rich_error = richError(A_h, pow(2, 2));
-  std::vector<double> order_est = order_estimates(alpha);
-  std::vector<int> f_computations = result.second;
+  std::print("\n--------------------------------------------\n");
+  std::print("Using Midpoint rule\n");
+
+  auto mid_result = computeMethod(midPointRec, func_1, a_low, b_high, 2);
+  std::vector<double> mid_A_h = mid_result.first;
+  std::vector<double> mid_diff = A_h_diff(mid_A_h);
+  std::vector<double> mid_alpha = alphaK(mid_A_h);
+  std::vector<double> mid_rich_error = richError(mid_A_h, pow(2, 2));
+  std::vector<double> mid_order_est = order_estimates(mid_alpha);
+  std::vector<int> mid_f_computations = mid_result.second;
 
   std::print("\n{:>3} {:>12} {:>18} {:>12} {:>12} {:>12} {:>10}\n", "i",
              "A(h_i)", "A(h_{i-1}) - A(h_i)", "alpha^k", "Rich error",
              "Order est.", "f comps");
 
-  for (size_t i = 0; i < A_h.size(); ++i) {
+  for (size_t i = 0; i < mid_A_h.size(); ++i) {
     std::print("{:3} {:12.6f} {:18.6f} {:12.6f} {:12.6f} {:12.6f} {:10d}\n",
-               i + 1, A_h[i], diff[i], alpha[i], rich_error[i], order_est[i],
-               f_computations[i]);
+               i + 1, mid_A_h[i], mid_diff[i], mid_alpha[i], mid_rich_error[i],
+               mid_order_est[i], mid_f_computations[i]);
+  }
+
+  std::print("\n--------------------------------------------\n");
+  std::print("Using Simpson's rule\n");
+
+  auto sim_result = computeMethod(simpson, func_1, a_low, b_high, 4);
+  std::vector<double> sim_A_h = sim_result.first;
+  std::vector<double> sim_diff = A_h_diff(sim_A_h);
+  std::vector<double> sim_alpha = alphaK(sim_A_h);
+  std::vector<double> sim_rich_error = richError(sim_A_h, pow(2, 2));
+  std::vector<double> sim_order_est = order_estimates(sim_alpha);
+  std::vector<int> sim_f_computations = sim_result.second;
+
+  std::print("\n{:>3} {:>12} {:>18} {:>12} {:>12} {:>12} {:>10}\n", "i",
+             "A(h_i)", "A(h_{i-1}) - A(h_i)", "alpha^k", "Rich error",
+             "Order est.", "f comps");
+
+  for (size_t i = 0; i < sim_A_h.size(); ++i) {
+    std::print("{:3} {:12.6f} {:18.6f} {:12.6f} {:12.6f} {:12.6f} {:10d}\n",
+               i + 1, sim_A_h[i], sim_diff[i], sim_alpha[i], sim_rich_error[i],
+               sim_order_est[i], sim_f_computations[i]);
+  }
+
+  std::print("\n--------------------------------------------\n");
+  std::print("Using Trapezoidal rule\n");
+
+  auto trap_result = computeMethod(trapezoidal, func_1, a_low, b_high, 2);
+  std::vector<double> trap_A_h = trap_result.first;
+  std::vector<double> trap_diff = A_h_diff(trap_A_h);
+  std::vector<double> trap_alpha = alphaK(trap_A_h);
+  std::vector<double> trap_rich_error = richError(trap_A_h, pow(2, 2));
+  std::vector<double> trap_order_est = order_estimates(trap_alpha);
+  std::vector<int> trap_f_computations = trap_result.second;
+
+  std::print("\n{:>3} {:>12} {:>18} {:>12} {:>12} {:>12} {:>10}\n", "i",
+             "A(h_i)", "A(h_{i-1}) - A(h_i)", "alpha^k", "Rich error",
+             "Order est.", "f comps");
+
+  for (size_t i = 0; i < trap_A_h.size(); ++i) {
+    std::print("{:3} {:12.6f} {:18.6f} {:12.6f} {:12.6f} {:12.6f} {:10d}\n",
+               i + 1, trap_A_h[i], trap_diff[i], trap_alpha[i],
+               trap_rich_error[i], trap_order_est[i], trap_f_computations[i]);
   }
 
   return 0;
