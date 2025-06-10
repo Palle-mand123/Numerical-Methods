@@ -56,32 +56,10 @@ void problemI(MatDoub A) {
 void problemII(MatDoub A) {
   SVD svd(A);
 
-  int index;
+  util::print(svd.nullspace(1e-10));
 
-  for (int i = 0; i < svd.w.size(); i++) {
-    if (svd.w[i] < 1e-10) {
-      index = i;
-    }
-  }
 
-  VecDoub null_vector(svd.v.nrows());
-  for (int i = 0; i < svd.v.nrows(); i++) {
-    null_vector[i] = svd.v[i][index];
-  }
 
-  std::cout << "\nExtracted column from svd.v with near zero value index:\n "
-            << std::endl;
-  util::print(null_vector);
-
-  double norm = util::norm(null_vector);
-  std::cout << "\nIf norm of null vector == 1 its a unit vector: " << norm
-            << std::endl;
-
-  VecDoub result = A * null_vector;
-  std::cout << "\nIf A * null_vector is near zero null_vector is a unit vector "
-               "in the null space of A"
-            << std::endl;
-  util::print(result);
 }
 
 VecDoub problemIII(VecDoub b, MatDoub A) {

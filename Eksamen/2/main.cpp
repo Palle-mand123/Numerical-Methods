@@ -65,9 +65,18 @@ int main() {
   auto functions = vecfunc;
   bool check;
   newt(x, check, functions);
+
+  // beregn dx_k om beregne kun for 1 x
+
+  std::print("\n--------------------Problem III------------------------\n");
+  // lektion 7 eller 8
+  // convergence konstant til at finde accuracy estimate of c og ek
 }
 
 //----------------------- roots_multidim.h -----------------------
+
+// find hvor der er backtracking i funktionnen og få printet hvis det bruges
+
 
 template <class T>
 void lnsrch(VecDoub_I &xold, const Doub fold, VecDoub_I &g, VecDoub_IO &p,

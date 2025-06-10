@@ -46,6 +46,7 @@ std::vector<double> alphaK(std::vector<double> &A_h) {
   return alphaK;
 }
 
+// kan bruges til sidste opgave men estimated alphaK og ikke expected
 std::vector<double> richError(std::vector<double> &A_h,
                               const double alphaK_exp) {
   std::vector<double> richError = {NAN};
@@ -89,7 +90,7 @@ std::pair<std::vector<double>, std::vector<int>> computeMethod(
   std::vector<int> f_computations;
   double error = std::numeric_limits<double>::max();
   int iterations = 2;
-  while (abs(error) > accuracy && iterations < max_iterations) {
+  while (abs(error) > accuracy && iterations <= max_iterations) {
     A_h.push_back(method(f, a_low, b_high, iterations));
     f_computations.push_back(iterations);
     error = richError_current(A_h, pow(2, exp_order));
@@ -127,13 +128,28 @@ int main() {
   }
 
   std::print("\n--------------------Problem II------------------------\n");
-
+  // skriv i rapport at order estimate skal læses ud fra tabellen i probem 1 ved
+  // k=20
   std::print("\nOrder estimates for Problem II:\n");
   for (size_t i = 0; i < sim_A_h.size(); ++i) {
     std::print(" {}: {:.6f}\n", i, sim_order_est[i]);
   }
 
-  std::print("\n--------------------Problem IV------------------------\n");
+  std::print("\n--------------------Problem III------------------------\n");
 
+  // integral går 0 til 2 se på ligningen under kvadratroden når x = 2 og så
+  // bliver det 2 - 2 osv.
+
+  std::print("\n--------------------Problem IV------------------------\n");
+  if (sim_order_est.size() >= 2 && sim_A_h.size() >= 2) {
+    double p = sim_order_est.back();
+    double A_last = sim_A_h.back();
+    double A_prev = sim_A_h[sim_A_h.size() - 2];
+    double error_estimate = (A_last - A_prev) / (std::pow(2.0, p) - 1.0);
+    std::print("Estimated accuracy at N=2^20: {:.6e}\n", error_estimate);
+  }
+
+  std::print("\n--------------------Problem V------------------------\n");
+  // godt at bruge midpoint imod det som finder sted i funktionen med kvadratrod
   return 0;
 }
