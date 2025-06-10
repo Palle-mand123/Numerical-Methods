@@ -8,9 +8,10 @@
 #include <vector>
 template <class T> void newt(VecDoub_IO &x, Bool &check, T &vecfunc);
 
-void printRoots(std::vector<VecDoub> &roots_x) {
+void printRoots(const std::vector<VecDoub> &roots_x,
+                const std::vector<double> &lambda_vals) {
   std::vector<VecDoub> dx_k;
-  dx_k.push_back(VecDoub(2));
+  dx_k.push_back(VecDoub(4));
   for (size_t i = 1; i < roots_x.size(); i++) {
     dx_k.push_back(roots_x[i] - roots_x[i - 1]);
   }
@@ -28,13 +29,25 @@ void printRoots(std::vector<VecDoub> &roots_x) {
     errorX_k.push_back(convergence.at(i) * pow(util::norm(dx_k[i]), 2));
   }
 
-  std::print("\n k  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}\n", "x0", "x1", "x2",
-             "x3", "dx_k");
+  std::vector<double> backtracking;
+  for (size_t i = 0; i < lambda_vals.size(); i++) {
+    if (lambda_vals[i] < 1) {
+      backtracking.push_back(lambda_vals[i]);
+    } else {
+      backtracking.push_back(NAN);
+    }
+  }
 
-  for (size_t i = 0; i < roots_x.size(); ++i) {
-    std::print("{:2}  {:10.6f}  {:10.6f}  {:10.6f}  {:10.6f}  {:10.6f}\n",
+  std::print(
+      "\n k  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}\n",
+      "x0", "x1", "x2", "x3", "dx_k", "lambda", "convergence", " errorX_k");
+
+  for (size_t i = 0; i < 7; ++i) {
+    std::print("{:2}  {:10.6f}  {:10.6f}  {:10.6f}  {:10.6f}  {:10.6f}  "
+               "{:10.6f}  {:10.6f}  {:10.6f}\n",
                i + 1, roots_x[i][0], roots_x[i][1], roots_x[i][2],
-               roots_x[i][3], dx_k[i][0], convergence[i], errorX_k[i]);
+               roots_x[i][3], dx_k[i][0], backtracking[i], convergence[i],
+               errorX_k[i]);
   }
 }
 
@@ -59,28 +72,21 @@ int main() {
   auto solutions = vecfunc(VecDoub(4, x_vals));
   util::print(solutions);
 
-  std::print("\n--------------------Problem II------------------------\n");
+  std::print(
+      "\n--------------------Problem II & III------------------------\n");
   Doub x_guess[] = {0, 0, 0, 0};
   VecDoub_IO x(4, x_guess);
   auto functions = vecfunc;
   bool check;
   newt(x, check, functions);
-
-  // beregn dx_k om beregne kun for 1 x
-
-  std::print("\n--------------------Problem III------------------------\n");
-  // lektion 7 eller 8
-  // convergence konstant til at finde accuracy estimate of c og ek
 }
 
 //----------------------- roots_multidim.h -----------------------
 
-// find hvor der er backtracking i funktionnen og få printet hvis det bruges
-
-
 template <class T>
 void lnsrch(VecDoub_I &xold, const Doub fold, VecDoub_I &g, VecDoub_IO &p,
-            VecDoub_O &x, Doub &f, const Doub stpmax, Bool &check, T &func) {
+            VecDoub_O &x, Doub &f, const Doub stpmax, Bool &check, T &func,
+            std::vector<double> &lambda_vals) {
   const Doub ALF = 1.0e-4, TOLX = numeric_limits<Doub>::epsilon();
   Doub a, alam, alam2 = 0.0, alamin, b, disc, f2 = 0.0;
   Doub rhs1, rhs2, slope = 0.0, sum = 0.0, temp, test, tmplam;
@@ -112,10 +118,12 @@ void lnsrch(VecDoub_I &xold, const Doub fold, VecDoub_I &g, VecDoub_IO &p,
       for (i = 0; i < n; i++)
         x[i] = xold[i];
       check = true;
+      lambda_vals.push_back(alam);
       return;
-    } else if (f <= fold + ALF * alam * slope)
+    } else if (f <= fold + ALF * alam * slope) {
+      lambda_vals.push_back(alam);
       return;
-    else {
+    } else {
       if (alam == 1.0)
         tmplam = -slope / (2.0 * (f - fold - slope));
       else {
@@ -186,6 +194,7 @@ template <class T> void newt(VecDoub_IO &x, Bool &check, T &vecfunc) {
   const Doub TOLF = 1.0e-8, TOLMIN = 1.0e-12, STPMX = 100.0;
   const Doub TOLX = numeric_limits<Doub>::epsilon();
   std::vector<VecDoub> roots_x;
+  std::vector<double> lambda_vals;
   Int i, j, its, n = x.size();
   Doub den, f, fold, stpmax, sum, temp, test;
   VecDoub g(n), p(n), xold(n);
@@ -194,7 +203,7 @@ template <class T> void newt(VecDoub_IO &x, Bool &check, T &vecfunc) {
   NRfdjac<T> fdjac(vecfunc);
   VecDoub &fvec = fmin.fvec;
   f = fmin(x);
-  roots_x.push_back(x);
+  // roots_x.push_back(x);
   test = 0.0;
   for (i = 0; i < n; i++)
     if (abs(fvec[i]) > test)
@@ -222,7 +231,7 @@ template <class T> void newt(VecDoub_IO &x, Bool &check, T &vecfunc) {
       p[i] = -fvec[i];
     LUdcmp alu(fjac);
     alu.solve(p, p);
-    lnsrch(xold, fold, g, p, x, f, stpmax, check, fmin);
+    lnsrch(xold, fold, g, p, x, f, stpmax, check, fmin, lambda_vals);
     test = 0.0;
     for (i = 0; i < n; i++)
       if (abs(fvec[i]) > test)
@@ -230,7 +239,8 @@ template <class T> void newt(VecDoub_IO &x, Bool &check, T &vecfunc) {
     if (test < TOLF) {
       check = false;
       roots_x.push_back(x);
-      printRoots(roots_x);
+      printRoots(roots_x, lambda_vals);
+      ;
       return;
     }
     if (check) {
@@ -243,7 +253,8 @@ template <class T> void newt(VecDoub_IO &x, Bool &check, T &vecfunc) {
       }
       check = (test < TOLMIN);
       roots_x.push_back(x);
-      printRoots(roots_x);
+      printRoots(roots_x, lambda_vals);
+
       return;
     }
     test = 0.0;
@@ -254,7 +265,8 @@ template <class T> void newt(VecDoub_IO &x, Bool &check, T &vecfunc) {
     }
     if (test < TOLX) {
       roots_x.push_back(x);
-      printRoots(roots_x);
+      printRoots(roots_x, lambda_vals);
+
       return;
     }
     roots_x.push_back(x);

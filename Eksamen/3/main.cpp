@@ -31,19 +31,19 @@ VecDoub derivs(const Doub t, VecDoub_I &x) {
 }
 
 VecDoub second_order_runge_kuttea_method(double low, double high, int steps,
-                                         VecDoub_I &y,
+                                         VecDoub_I &x,
                                          VecDoub derivs(const Doub x,
                                                         VecDoub_I &y)) {
   const double h = (high - low) / (double)steps;
-  VecDoub y_n = y;
-  for (double x_n = low; x_n < high; x_n += h) {
+  VecDoub x_n = x;
+  for (double t_n = low; t_n < high; t_n += h) {
     f_comps_current += 2;
-    auto k1 = h * derivs(x_n, y_n);
-    auto k2 = h * derivs(x_n + 0.5 * h, y_n + 0.5 * k1);
-    auto y_n_next = y_n + k2;
-    y_n = y_n_next;
+    auto k1 = h * derivs(t_n, x_n);
+    auto k2 = h * derivs(t_n + 0.5 * h, x_n + 0.5 * k1);
+    auto y_n_next = x_n + k2;
+    x_n = y_n_next;
   }
-  return y_n;
+  return x_n;
 }
 
 int main() {

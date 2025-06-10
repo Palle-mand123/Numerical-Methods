@@ -11,12 +11,12 @@ MatDoub readMatrix(const std::string &filename) {
   }
 
   int M, N;
-  file >> M >> N; // Read number of rows and columns
+  file >> M >> N;
 
-  MatDoub matrix(M, N); // Create matrix with M rows and N columns
+  MatDoub matrix(M, N);
   for (int i = 0; i < M; i++) {
     for (int j = 0; j < N; j++) {
-      file >> matrix[i][j]; // Read each element
+      file >> matrix[i][j];
     }
   }
 
@@ -33,14 +33,14 @@ VecDoub readVector(const std::string &filename) {
 
   int M, N;
   file >> M >> N;
-  if (N != 1) { // Check if its a vector
+  if (N != 1) {
     std::cerr << "Expected a vector (N=1), but got N=" << N << std::endl;
     exit(1);
   }
 
-  VecDoub vec(M); // Create vector with M elements
+  VecDoub vec(M);
   for (int i = 0; i < M; i++) {
-    file >> vec[i]; // Read each element
+    file >> vec[i];
   }
 
   file.close();
@@ -57,9 +57,6 @@ void problemII(MatDoub A) {
   SVD svd(A);
 
   util::print(svd.nullspace(1e-10));
-
-
-
 }
 
 VecDoub problemIII(VecDoub b, MatDoub A) {
