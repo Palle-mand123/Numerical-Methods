@@ -49,7 +49,7 @@ VecDoub readVector(const std::string &filename) {
 
 void problemI(MatDoub A) {
   SVD svd(A);
-  std::cout << "Diagonal elements of W:" << std::endl;
+  std::cout << "Diagonal elements of W:\n" << std::endl;
   util::print(svd.w);
 }
 
@@ -66,7 +66,7 @@ VecDoub problemIII(VecDoub b, MatDoub A) {
 
   svd.solve(b, x);
 
-  std::cout << "Best fit solution parameters x:" << std::endl;
+  std::cout << "Best fit solution parameters x:\n" << std::endl;
   util::print(x);
   return x;
 }
@@ -81,7 +81,7 @@ void residualError(MatDoub A, VecDoub b, VecDoub x) {
 void randomFittingError(const MatDoub &A) {
   int m = A.nrows(), n = A.ncols();
   Doub result = std::sqrt((m - n) / static_cast<Doub>(m));
-  std::cout << "\nRandom fit Error= " << result << std::endl;
+  std::cout << "\nRandom fit Error = " << result << std::endl;
 }
 
 void sigErrorEstimate(MatDoub A, VecDoub b, VecDoub x) {
@@ -98,7 +98,6 @@ void sigErrorEstimate(MatDoub A, VecDoub b, VecDoub x) {
     sigma[j] = sqrt(sum);
   }
 
-  std::cout << "\nAnd now the error:" << std::endl;
   std::cout << "sigma\tVector " << svd.w.size() << "D:" << std::endl;
   util::print(sigma);
 }
@@ -106,7 +105,9 @@ void sigErrorEstimate(MatDoub A, VecDoub b, VecDoub x) {
 void problemIV(MatDoub A, VecDoub b, VecDoub x) {
   residualError(A, b, x);
   randomFittingError(A);
+  std::cout << "\n" << std::endl;
   sigErrorEstimate(A, b, x);
+  std::cout << "\n" << std::endl;
 }
 
 int main() {
@@ -116,13 +117,17 @@ int main() {
   VecDoub b = readVector("/Users/patrickandersen/Desktop/6 semester/Numeriske "
                          "Metoder/Code/Eksamen/1/NUM S25_Ex1b.dat");
 
-  std::cout << "\n------------------------------------------\n" << std::endl;
+  std::cout << "\n------------------ Problem i ------------------------\n"
+            << std::endl;
   problemI(A);
-  std::cout << "\n------------------------------------------\n" << std::endl;
+  std::cout << "\n------------------ Problem ii ------------------------\n"
+            << std::endl;
   problemII(A);
-  std::cout << "\n------------------------------------------\n" << std::endl;
+  std::cout << "\n------------------ Problem iii ------------------------\n"
+            << std::endl;
   VecDoub x = problemIII(b, A);
-  std::cout << "\n------------------------------------------\n" << std::endl;
+  std::cout << "\n------------------ Problem iV ------------------------\n"
+            << std::endl;
   problemIV(A, b, x);
 
   return 0;

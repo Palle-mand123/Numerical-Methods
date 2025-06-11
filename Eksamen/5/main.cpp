@@ -1,3 +1,4 @@
 
-// brug parabolic PDE lektion 14
+#include "nr3.h"
+
 int main() { return 0; }

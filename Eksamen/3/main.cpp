@@ -30,19 +30,30 @@ VecDoub derivs(const Doub t, VecDoub_I &x) {
   return dxdt;
 }
 
-VecDoub second_order_runge_kuttea_method(double low, double high, int steps,
-                                         VecDoub_I &x,
-                                         VecDoub derivs(const Doub x,
-                                                        VecDoub_I &y)) {
+void printData(std::vector<VecDoub> &data) {
+  std::cout << "Data points:\n";
+  for (int i = 0; i < data.size(); i++) {
+    std::cout << "x: " << data[i][0] << ", t: " << data[i][1] << "\n";
+  }
+}
+
+VecDoub second_order_mid_runge_kuttea_method(double low, double high, int steps,
+                                             VecDoub_I &x,
+                                             VecDoub derivs(const Doub x,
+                                                            VecDoub_I &y)) {
   const double h = (high - low) / (double)steps;
+  std::vector<VecDoub> data;
   VecDoub x_n = x;
   for (double t_n = low; t_n < high; t_n += h) {
     f_comps_current += 2;
     auto k1 = h * derivs(t_n, x_n);
     auto k2 = h * derivs(t_n + 0.5 * h, x_n + 0.5 * k1);
-    auto y_n_next = x_n + k2;
-    x_n = y_n_next;
+    auto t_n_next = x_n + k2;
+    x_n = t_n_next;
+    data.push_back(x_n);
   }
+
+  printData(data);
   return x_n;
 }
 
@@ -57,9 +68,10 @@ int main() {
   std::print("\n--------------------Problem III------------------------\n");
 
   VecDoub mid_result =
-      second_order_runge_kuttea_method(-10, 10.0, 80, x1, derivs);
+      second_order_mid_runge_kuttea_method(-10, 10.0, 80, x1, derivs);
 
   util::print(mid_result);
+  std::cout << "\n" << endl;
 
   return 0;
 }

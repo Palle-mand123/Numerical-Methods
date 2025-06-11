@@ -9,8 +9,7 @@ double simpson(double (*f)(double), const double a_low, const double b_high,
                int iterations = 100) {
 
   if (iterations % 2 != 0) {
-    std::cerr << "Error: subIntervals must be even for Simpson's rule."
-              << std::endl;
+    std::cerr << "Error: subIntervals must be even for Simpson." << std::endl;
     ++iterations;
   }
 
@@ -46,7 +45,6 @@ std::vector<double> alphaK(std::vector<double> &A_h) {
   return alphaK;
 }
 
-// kan bruges til sidste opgave men estimated alphaK og ikke expected
 std::vector<double> richError(std::vector<double> &A_h,
                               const double alphaK_exp) {
   std::vector<double> richError = {NAN};
@@ -102,7 +100,7 @@ std::pair<std::vector<double>, std::vector<int>> computeMethod(
 double func_1(double x) { return exp(pow(x, 3)) * sqrt(x * (2 - x)); }
 
 int main() {
-  std::print("\n--------------------Problem I------------------------\n");
+  std::print("\n-------------------- Problem I ------------------------\n");
   double a_low = 0.0;
   double b_high = 2.0;
 
@@ -128,28 +126,20 @@ int main() {
   }
 
   std::print("\n--------------------Problem II------------------------\n");
-  // skriv i rapport at order estimate skal læses ud fra tabellen i probem 1 ved
-  // k=20
+
   std::print("\nOrder estimates for Problem II:\n");
   for (size_t i = 0; i < sim_A_h.size(); ++i) {
     std::print(" {}: {:.6f}\n", i, sim_order_est[i]);
   }
 
-  std::print("\n--------------------Problem III------------------------\n");
-
-  // integral går 0 til 2 se på ligningen under kvadratroden når x = 2 og så
-  // bliver det 2 - 2 osv.
-
   std::print("\n--------------------Problem IV------------------------\n");
   if (sim_order_est.size() >= 2 && sim_A_h.size() >= 2) {
-    double p = sim_order_est.back();
+    double ak = sim_order_est.back();
     double A_last = sim_A_h.back();
     double A_prev = sim_A_h[sim_A_h.size() - 2];
-    double error_estimate = (A_last - A_prev) / (std::pow(2.0, p) - 1.0);
-    std::print("Estimated accuracy at N=2^20: {:.6e}\n", error_estimate);
+    double error_estimate = (A_last - A_prev) / (std::pow(2.0, ak) - 1.0);
+    std::print("\nEstimated accuracy at N = 2^20: {:.6e}\n", error_estimate);
   }
 
-  std::print("\n--------------------Problem V------------------------\n");
-  // godt at bruge midpoint imod det som finder sted i funktionen med kvadratrod
   return 0;
 }

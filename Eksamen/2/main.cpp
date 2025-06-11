@@ -40,7 +40,7 @@ void printRoots(const std::vector<VecDoub> &roots_x,
 
   std::print(
       "\n k  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}\n",
-      "x0", "x1", "x2", "x3", "dx_k", "lambda", "convergence", " errorX_k");
+      "x0", "x1", "x2", "x3", "dx_k", "lambda", "convergence", " error");
 
   for (size_t i = 0; i < 7; ++i) {
     std::print("{:2}  {:10.6f}  {:10.6f}  {:10.6f}  {:10.6f}  {:10.6f}  "
@@ -67,9 +67,10 @@ VecDoub vecfunc(VecDoub_I x) {
 
 int main() {
 
-  std::print("\n--------------------Problem I------------------------\n");
+  std::print("\n-------------------- Problem I ------------------------\n");
   Doub x_vals[] = {-0.7, 1.2, 2.3, -4.1};
   auto solutions = vecfunc(VecDoub(4, x_vals));
+  std::cout << "\n" << std::endl;
   util::print(solutions);
 
   std::print(
@@ -79,6 +80,7 @@ int main() {
   auto functions = vecfunc;
   bool check;
   newt(x, check, functions);
+  std::cout << "\n" << std::endl;
 }
 
 //----------------------- roots_multidim.h -----------------------
